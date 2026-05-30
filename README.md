@@ -22,8 +22,7 @@ kata-specific correction cues with a 3D body model.
 npm start
 ```
 
-Open `http://localhost:4173` in a browser. Camera access requires localhost or
-HTTPS. If camera access is blocked, the app keeps running with demo motion data.
+Open `http://localhost:4173` in Chrome, Edge, Safari, or Firefox. Camera access requires localhost or HTTPS; if you double-click `index.html` from your files, the demo mode will load but most browsers will block live camera access. If camera access is blocked, the app keeps running with demo motion data and shows a message in the preview.
 
 ## Test
 
