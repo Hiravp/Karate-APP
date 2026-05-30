@@ -221,6 +221,40 @@ canvas {
   font-size: 1.4rem;
 }
 
+.camera-diagnostics {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.camera-diagnostics strong {
+  color: var(--text);
+}
+
+.camera-diagnostics ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.camera-diagnostics li.ok {
+  color: var(--positive);
+}
+
+.camera-diagnostics li.warn {
+  color: var(--warning);
+}
+
+.camera-diagnostics li.error {
+  color: #ff8f8f;
+}
+
 .metric-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

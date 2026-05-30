@@ -314,6 +314,7 @@
     const video = document.querySelector("#camera-feed");
     const canvas = document.querySelector("#motion-canvas");
     const placeholder = document.querySelector("#camera-placeholder");
+    const cameraDiagnostics = document.querySelector("#camera-diagnostics");
     const appStatus = document.querySelector("#app-status");
     const motionScore = document.querySelector("#motion-score");
     const stabilityScore = document.querySelector("#stability-score");
@@ -340,6 +341,107 @@
 
     function setStatus(message) {
       appStatus.textContent = message;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"]/g, (character) => {
+        const replacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+        return replacements[character];
+      });
+    }
+
+    function isLocalBrowserOrigin() {
+      return ["localhost", "127.0.0.1", "::1", "[::1]", ""].includes(window.location.hostname);
+    }
+
+    function isCameraSecureContext() {
+      return window.isSecureContext || window.location.protocol === "https:" || isLocalBrowserOrigin();
+    }
+
+    function getCameraAccessMessage(error) {
+      if (!isCameraSecureContext()) {
+        return "Chrome blocks camera access unless the app is opened from http://localhost, http://127.0.0.1, or HTTPS.";
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        return "This browser does not expose camera access to this page. Open it in current Google Chrome from http://localhost:4173.";
+      }
+
+      if (!error) {
+        return "Ready for your real Chrome camera. Click Start camera and allow permission when Chrome asks.";
+      }
+
+      if (error.name === "NotAllowedError" || error.name === "SecurityError") {
+        return "Chrome denied camera permission. Click the camera/lock icon in the address bar, allow Camera, then press Start camera again.";
+      }
+
+      if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
+        return "Chrome could not find a webcam. Check that your camera is connected and enabled in your computer settings.";
+      }
+
+      if (error.name === "NotReadableError" || error.name === "TrackStartError") {
+        return "Chrome found the camera but could not start it. Close Zoom, Teams, or any other app using the webcam, then try again.";
+      }
+
+      if (error.name === "OverconstrainedError" || error.name === "ConstraintNotSatisfiedError") {
+        return "Your camera did not support the requested size or facing mode. The app will retry with Chrome's default webcam settings.";
+      }
+
+      return error.message || "Chrome could not start the webcam. Check browser permissions and try again.";
+    }
+
+    async function getCameraDeviceCount() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return null;
+      }
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        return devices.filter((device) => device.kind === "videoinput").length;
+      } catch (_error) {
+        return null;
+      }
+    }
+
+    async function renderCameraDiagnostics({ mode = "ready", error = null } = {}) {
+      const cameraCount = await getCameraDeviceCount();
+      const secure = isCameraSecureContext();
+      const hasApi = Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+      const pageAddress = window.location.protocol === "file:" ? "a local file" : window.location.href;
+      const accessMessage = getCameraAccessMessage(error);
+      const statusClass = mode === "active" ? "ok" : error ? "error" : "warn";
+      const cameraLine = cameraCount === null ? "Camera list unavailable until permission is granted" : `${cameraCount} camera${cameraCount === 1 ? "" : "s"} visible to Chrome`;
+
+      cameraDiagnostics.innerHTML = `
+        <strong>Real Chrome camera status</strong>
+        <ul>
+          <li class="${secure ? "ok" : "error"}">Page address: ${escapeHtml(pageAddress)}</li>
+          <li class="${secure ? "ok" : "error"}">Secure camera context: ${secure ? "yes" : "no"}</li>
+          <li class="${hasApi ? "ok" : "error"}">Chrome camera API: ${hasApi ? "available" : "blocked"}</li>
+          <li class="${cameraCount && cameraCount > 0 ? "ok" : "warn"}">${escapeHtml(cameraLine)}</li>
+          <li class="${statusClass}">${escapeHtml(accessMessage)}</li>
+        </ul>
+      `;
+    }
+
+    async function requestCameraStream() {
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "user" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      } catch (error) {
+        if (error.name !== "OverconstrainedError" && error.name !== "ConstraintNotSatisfiedError") {
+          throw error;
+        }
+
+        await renderCameraDiagnostics({ mode: "retrying", error });
+        return navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
     }
 
     function formatPercent(value) {
@@ -446,41 +548,47 @@
     }
 
     async function startCamera() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      await renderCameraDiagnostics();
+
+      if (!isCameraSecureContext() || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         placeholder.hidden = false;
         placeholder.innerHTML = `
-          <strong>Camera needs localhost or HTTPS</strong>
-          <span>Open this app from http://localhost:4173 or a secure website. Demo mode is still running.</span>
+          <strong>Open in Chrome from localhost or HTTPS</strong>
+          <span>On your computer run npm start, then open http://localhost:4173 in Google Chrome. Demo mode is still running.</span>
         `;
-        setStatus("Demo mode active; camera requires localhost or HTTPS.");
+        setStatus("Demo mode active; Chrome requires localhost or HTTPS for the real camera.");
+        await renderCameraDiagnostics({ mode: "blocked" });
         runDemoLoop();
         return;
       }
 
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user",
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
-          audio: false
-        });
+        cameraToggle.disabled = true;
+        cameraToggle.textContent = "Starting camera...";
+        setStatus("Waiting for Chrome camera permission...");
+        stream = await requestCameraStream();
         video.srcObject = stream;
+        await video.play();
         placeholder.hidden = true;
+        cameraToggle.disabled = false;
         cameraToggle.textContent = "Stop camera";
-        setStatus("Camera active; video stays on your device.");
+        setStatus("Real Chrome camera active; video stays on your device.");
+        await renderCameraDiagnostics({ mode: "active" });
         previousFrame = null;
         cancelAnimationFrame(animationFrame);
         analyzeCameraFrame();
       } catch (error) {
         stream = null;
+        video.srcObject = null;
+        cameraToggle.disabled = false;
+        cameraToggle.textContent = "Start camera";
         placeholder.hidden = false;
         placeholder.innerHTML = `
-          <strong>Camera unavailable</strong>
-          <span>${error.message || "Permission was denied"}. Demo analysis is still running.</span>
+          <strong>Camera unavailable in Chrome</strong>
+          <span>${escapeHtml(getCameraAccessMessage(error))} Demo analysis is still running.</span>
         `;
-        setStatus("Demo mode active; camera permission was not available.");
+        setStatus("Demo mode active; Chrome could not start the real camera.");
+        await renderCameraDiagnostics({ mode: "error", error });
         runDemoLoop();
       }
     }
@@ -494,6 +602,7 @@
       placeholder.hidden = false;
       cameraToggle.textContent = "Start camera";
       setStatus("Demo mode active; no video leaves your device.");
+      renderCameraDiagnostics();
       previousFrame = null;
       cancelAnimationFrame(animationFrame);
       runDemoLoop();
@@ -510,6 +619,7 @@
     renderKataDetails(selectedKata);
     renderAnalysis(analyzeKataFrame(selectedKata, createDemoSample()));
     setStatus("Demo mode active; start camera for live motion sensing.");
+    renderCameraDiagnostics();
     runDemoLoop();
 
     kataSelect.addEventListener("change", handleKataChange);
