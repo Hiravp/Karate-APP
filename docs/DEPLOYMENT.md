@@ -1,8 +1,9 @@
 # Deploy All-in-One Math Help to Vercel
 
-Step-by-step guide to connect this GitHub repo to Vercel and run in production.
+**Optional — for later.** The app is fully usable locally without Vercel or Supabase.
+Use this guide when you are ready to connect cloud auth/DB and host the site.
 
-## 1. Create a Supabase project (optional but recommended)
+## 1. Create a Supabase project (optional)
 
 Without Supabase keys the app still works using a browser `localStorage` demo store. For real auth and shared class data:
 
