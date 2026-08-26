@@ -101,17 +101,18 @@ export default function TeacherDashboardPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-ink">{cls.name}</p>
-                      <p className="mt-1 flex items-center gap-2 font-mono text-sm text-ink/70">
-                        Code: {cls.class_code}
+                      <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-ink px-3 py-1.5 font-mono text-base tracking-[0.2em] text-accent">
+                        {cls.class_code}
                         <button
                           type="button"
                           onClick={() => copyCode(cls.class_code)}
-                          className="rounded p-1 text-ink/50 hover:bg-ink/5 hover:text-ink"
+                          className="rounded p-1 text-accent/80 hover:bg-paper/10 hover:text-accent"
                           aria-label="Copy class code"
                         >
                           <Copy className="h-3.5 w-3.5" />
                         </button>
-                      </p>
+                      </div>
+                      <p className="mt-1 text-xs text-ink/50">Share this code with students</p>
                     </div>
                     <div className="text-right text-xs text-ink/55">
                       <p className="inline-flex items-center gap-1">
