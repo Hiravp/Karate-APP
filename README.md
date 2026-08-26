@@ -1,75 +1,70 @@
 # All-in-One Math Help
 
-Full-stack educational web app for teachers and students covering Algebra through Calculus, AP Math, and IB Math. AI features use the Cerebras API via Next.js Server Actions.
+Educational web app for teachers and students covering Algebra through Calculus, AP Math, and IB Math.
+
+**Local-first:** auth, classes, enrollments, and assignments run in the browser (`localStorage`). Cerebras AI runs through Next.js server actions. Supabase and Vercel can be connected later — schema and deploy notes are already in the repo.
 
 ## Tech stack
 
 - **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS
 - **UI:** shadcn-style components + Lucide React
-- **Backend / DB:** Supabase schema (PostgreSQL + Auth) with a local demo store when keys are unset
-- **AI:** `@cerebras/cerebras_cloud_sdk` (server-only)
+- **Local data:** browser demo store
+- **AI:** `@cerebras/cerebras_cloud_sdk` (server-only, with offline fallbacks)
 
 ## Quick start
 
 ```bash
 cp .env.example .env.local
-# Set CEREBRAS_API_KEY in .env.local
+# Optional: set CEREBRAS_API_KEY (offline demo worksheets/feedback still work without it)
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Local demo flow
+
+1. Sign up as a **teacher** → create a class → copy the 6-character code  
+2. Sign out → sign up as a **student** in the **same browser** → join with that code  
+3. Teacher: Assignment builder → **AI Generate** → save  
+4. Student: Assignments, Subjects, Games, or AI Homework Scanner  
+
 ## Environment
 
 | Variable | Purpose |
 | --- | --- |
-| `CEREBRAS_API_KEY` | Server-side Cerebras key (required for AI Generate / Scanner / Games) |
-| `CEREBRAS_MODEL` | Optional model override (default: `gemma-4-31b`) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Optional Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Optional service role key (server-only) |
+| `CEREBRAS_API_KEY` | Live AI (optional; offline content used if unavailable) |
+| `CEREBRAS_MODEL` | Optional override (default `gemma-4-31b`) |
 
-Without Supabase credentials, auth and class data persist in the browser (`localStorage`) so you can demo the full flow.
+## Later: Supabase + Vercel
 
-## Deploy to Vercel
+When you are ready to connect cloud services:
 
-See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for Supabase setup, linking this GitHub repo in Vercel, environment variables, and deploy steps. Preview/production from the CLI:
-
-```bash
-npx vercel
-npx vercel --prod
-```
-
-## Supabase schema
-
-Run `supabase/schema.sql` in the Supabase SQL editor to create:
-
-- `users`, `classes`, `enrollments`, `assignments`, `submissions`
-- signup trigger from `auth.users`
-- row-level security policies for teachers and students
+- Run `supabase/schema.sql` in the Supabase SQL editor  
+- Follow [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for Vercel  
 
 ## Features
 
 ### Teacher portal (`/teacher`)
 
-- Dashboard with managed classes and enrollments
-- Auto-generated 6-character `class_code` on class creation
-- Assignment builder with **AI Generate** (AP / IB / Standard worksheets)
+- Dashboard with managed classes and enrollments  
+- Auto-generated 6-character `class_code`  
+- Assignment builder with **AI Generate** (AP / IB / Standard)
 
 ### Student portal (`/student`)
 
-- Join class by code
-- Subject modules: Algebra, Geometry, Algebra 2, Precalculus, Calculus, AP, IB
-- Math games (AI quizzes)
-- AI Homework Scanner with mock OCR image upload + Cerebras tutor feedback
+- Join class by code  
+- View and answer assignments  
+- Subject modules: Algebra → IB Math  
+- Math games (AI quizzes)  
+- AI Homework Scanner (mock OCR + tutor feedback)
 
 ## Scripts
 
 ```bash
-npm run dev      # development server
-npm run build    # production build
-npm run start    # serve production build
-npm run lint     # eslint
-npm test         # unit tests
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm test
 ```

@@ -34,7 +34,7 @@ export default function StudentHomePage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { href: "/student/join", label: "Join class", icon: UserPlus, text: "Enter a 6-character code" },
-          { href: "/student/subjects", label: "Subjects", icon: BookOpen, text: "Algebra through IB Math" },
+          { href: "/student/assignments", label: "Assignments", icon: BookOpen, text: "Worksheets from your classes" },
           { href: "/student/games", label: "Math games", icon: Gamepad2, text: "Topic-based quizzes" },
           { href: "/student/scanner", label: "AI scanner", icon: ScanLine, text: "Step-by-step homework help" },
         ].map((item) => (

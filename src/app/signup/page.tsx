@@ -43,7 +43,7 @@ export default function SignupPage() {
         </Link>
         <PanelTitle className="mt-3">Create your account</PanelTitle>
         <p className="mt-1 text-sm text-ink/60">
-          Demo auth stores profiles locally. Connect Supabase for production.
+          Local demo — accounts stay in this browser (no password needed).
         </p>
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div>

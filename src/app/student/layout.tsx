@@ -8,6 +8,7 @@ import { AppHeader } from "@/components/layout/app-header";
 const LINKS = [
   { href: "/student", label: "Home" },
   { href: "/student/join", label: "Join class" },
+  { href: "/student/assignments", label: "Assignments" },
   { href: "/student/subjects", label: "Subjects" },
   { href: "/student/games", label: "Games" },
   { href: "/student/scanner", label: "Scanner" },

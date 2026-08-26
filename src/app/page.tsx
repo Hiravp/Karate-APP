@@ -46,7 +46,7 @@ export default function HomePage() {
                   href="/signup"
                   className="group inline-flex h-12 items-center gap-2 rounded-md bg-accent px-7 text-base font-semibold text-ink transition hover:bg-accent-bright"
                 >
-                  Get started
+                  Get started locally
                   <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                 </Link>
                 <Link
@@ -56,6 +56,10 @@ export default function HomePage() {
                   I already have an account
                 </Link>
               </div>
+              <p className="animate-rise-delay-2 mt-4 max-w-lg text-sm text-paper/55">
+                Runs fully in your browser for auth/classes. AI calls go through Next.js
+                server actions. Supabase and Vercel can be connected later.
+              </p>
             </div>
 
             <div className="relative animate-drift" aria-hidden>
