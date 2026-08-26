@@ -25,11 +25,21 @@ Open [http://localhost:3000](http://localhost:3000).
 | Variable | Purpose |
 | --- | --- |
 | `CEREBRAS_API_KEY` | Server-side Cerebras key (required for AI Generate / Scanner / Games) |
+| `CEREBRAS_MODEL` | Optional model override (default: `gemma-4-31b`) |
 | `NEXT_PUBLIC_SUPABASE_URL` | Optional Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Optional service role key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional service role key (server-only) |
 
 Without Supabase credentials, auth and class data persist in the browser (`localStorage`) so you can demo the full flow.
+
+## Deploy to Vercel
+
+See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for Supabase setup, linking this GitHub repo in Vercel, environment variables, and deploy steps. Preview/production from the CLI:
+
+```bash
+npx vercel
+npx vercel --prod
+```
 
 ## Supabase schema
 
