@@ -49,15 +49,16 @@ When you are ready to connect cloud services:
 
 - Dashboard with managed classes and enrollments  
 - Auto-generated 6-character `class_code`  
-- Assignment builder with **AI Generate** (AP / IB / Standard)
+- Assignment builder with **AI Generate** (AP / IB / Standard)  
+- Submissions review with stored AI tutor feedback  
 
 ### Student portal (`/student`)
 
 - Join class by code  
-- View and answer assignments  
+- View and answer assignments + **AI feedback on my work**  
 - Subject modules: Algebra → IB Math  
 - Math games (AI quizzes)  
-- AI Homework Scanner (mock OCR + tutor feedback)
+- AI Homework Scanner (mock OCR + tutor feedback)  
 
 ## Scripts
 
