@@ -40,8 +40,10 @@ export default function TeacherAssignmentsPage() {
       });
       if (result.error) {
         setError(result.error);
-        setQuestions([]);
-        return;
+        if (result.questions.length === 0) {
+          setQuestions([]);
+          return;
+        }
       }
       setQuestions(result.questions);
     });

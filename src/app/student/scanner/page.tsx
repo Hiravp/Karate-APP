@@ -54,7 +54,7 @@ function ScannerInner() {
       });
       if (result.error) {
         setError(result.error);
-        return;
+        if (!result.feedback) return;
       }
       setFeedback(result.feedback);
     });

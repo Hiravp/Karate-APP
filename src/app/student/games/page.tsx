@@ -45,8 +45,10 @@ function GamesInner() {
       const result = await generateQuizAction({ subject, topic });
       if (result.error) {
         setError(result.error);
-        setQuiz([]);
-        return;
+        if (result.quiz.length === 0) {
+          setQuiz([]);
+          return;
+        }
       }
       setQuiz(result.quiz);
     });
