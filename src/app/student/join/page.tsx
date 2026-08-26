@@ -38,6 +38,8 @@ export default function JoinClassPage() {
         <h1 className="mt-2 font-display text-3xl tracking-tight">Enter your class code</h1>
         <p className="mt-2 text-ink/65">
           Ask your teacher for the 6-character code generated when they created the class.
+          For this local demo, teacher and student must use the <strong>same browser</strong>
+          so the shared class roster is available.
         </p>
       </div>
       <Panel>
