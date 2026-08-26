@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0a1628;
+  --ink-soft: #1c2d47;
+  --paper: #f4f7fb;
+  --paper-bright: #ffffff;
+  --accent: #f0b429;
+  --accent-bright: #ffc857;
+  --sea: #2a9d8f;
+  --sea-deep: #1b6b62;
+  --mist: #d7e3f4;
+  --background: var(--paper);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-paper: var(--paper);
+  --color-paper-bright: var(--paper-bright);
+  --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
+  --color-sea: var(--sea);
+  --color-sea-deep: var(--sea-deep);
+  --color-mist: var(--mist);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(244, 247, 251, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 247, 251, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.math-glow {
+  background:
+    radial-gradient(ellipse 80% 55% at 70% 20%, rgba(240, 180, 41, 0.22), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 15% 80%, rgba(42, 157, 143, 0.18), transparent 50%),
+    linear-gradient(160deg, #07111f 0%, #12233d 48%, #0a1628 100%);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 240;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-rise {
+  animation: rise-in 0.7s ease-out both;
+}
+
+.animate-rise-delay {
+  animation: rise-in 0.8s ease-out 0.15s both;
+}
+
+.animate-rise-delay-2 {
+  animation: rise-in 0.85s ease-out 0.28s both;
+}
+
+.animate-drift {
+  animation: drift 5.5s ease-in-out infinite;
+}
+
+.curve-draw {
+  stroke-dasharray: 240;
+  animation: draw-line 1.6s ease-out forwards;
+}
