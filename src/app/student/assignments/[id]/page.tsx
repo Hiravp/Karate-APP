@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useTransition } from "react";
 import { useParams } from "next/navigation";
+import { Loader2, ScanLine } from "lucide-react";
+import { scanHomeworkAction } from "@/actions/cerebras";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,9 +26,12 @@ export default function StudentAssignmentDetailPage() {
   );
 
   const [answers, setAnswers] = useState<Record<string, string>>(
-    existing?.answers ?? {}
+    () => existing?.answers ?? {}
   );
+  const [feedback, setFeedback] = useState(existing?.ai_feedback ?? "");
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   if (!assignment) {
     return (
@@ -44,9 +49,39 @@ export default function StudentAssignmentDetailPage() {
     saveSubmission({
       assignment_id: assignment!.id,
       answers,
-      ai_feedback: null,
+      ai_feedback: feedback || null,
     });
     setSaved(true);
+  }
+
+  function onAiReview() {
+    setError(null);
+    const problemText = assignment!.content
+      .map((q, i) => `Q${i + 1}: ${q.prompt}`)
+      .join("\n\n");
+    const studentWork = assignment!.content
+      .map((q, i) => `Q${i + 1} work:\n${answers[q.id]?.trim() || "(blank)"}`)
+      .join("\n\n");
+
+    startTransition(async () => {
+      const result = await scanHomeworkAction({
+        problemText,
+        studentWork,
+        subject: assignment!.topic,
+      });
+      if (result.error && !result.feedback) {
+        setError(result.error);
+        return;
+      }
+      if (result.error) setError(result.error);
+      setFeedback(result.feedback);
+      saveSubmission({
+        assignment_id: assignment!.id,
+        answers,
+        ai_feedback: result.feedback,
+      });
+      setSaved(true);
+    });
   }
 
   return (
@@ -85,14 +120,37 @@ export default function StudentAssignmentDetailPage() {
         ))}
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit">Save answers</Button>
+          <Button
+            type="button"
+            variant="accent"
+            onClick={onAiReview}
+            disabled={pending}
+          >
+            {pending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ScanLine className="h-4 w-4" />
+            )}
+            {pending ? "Reviewing…" : "AI feedback on my work"}
+          </Button>
           <Link href="/student/scanner">
             <Button type="button" variant="soft">
-              Need help? Open scanner
+              Open scanner
             </Button>
           </Link>
           {saved && <p className="text-sm text-sea-deep">Saved locally.</p>}
         </div>
+        {error && <p className="text-sm text-amber-700">{error}</p>}
       </form>
+
+      {feedback && (
+        <Panel>
+          <PanelTitle>AI tutor feedback</PanelTitle>
+          <div className="mt-3 whitespace-pre-wrap rounded-lg border border-ink/10 bg-mist/30 p-4 text-sm leading-relaxed">
+            {feedback}
+          </div>
+        </Panel>
+      )}
     </div>
   );
 }

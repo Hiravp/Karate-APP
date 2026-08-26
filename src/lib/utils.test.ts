@@ -64,4 +64,39 @@ describe("demo store join flow", () => {
     const result = storeApi.joinClass(blank(), "stu", "AB");
     assert.match(result.error ?? "", /6-character/);
   });
+
+  it("saves submissions with AI feedback for teachers to review", () => {
+    let s = blank();
+    const teacher = storeApi.signUp(s, {
+      full_name: "Ms Patel",
+      email: "t@school.test",
+      role: "teacher",
+    });
+    s = teacher.store;
+    const cls = storeApi.createClass(s, teacher.user.id, "Calc");
+    s = cls.store;
+    const asg = storeApi.createAssignment(s, {
+      class_id: cls.classRecord.id,
+      topic: "Derivatives",
+      content: [{ id: "q1", prompt: "Differentiate x^2" }],
+    });
+    s = asg.store;
+    const student = storeApi.signUp(s, {
+      full_name: "Sam",
+      email: "s@school.test",
+      role: "student",
+    });
+    s = student.store;
+    s = storeApi.joinClass(s, student.user.id, cls.classRecord.class_code).store;
+    const sub = storeApi.saveSubmission(s, {
+      assignment_id: asg.assignment.id,
+      student_id: student.user.id,
+      answers: { q1: "2x" },
+      ai_feedback: "Looks correct — check your constant of notation.",
+    });
+    s = sub.store;
+    const rows = storeApi.teacherSubmissions(s, teacher.user.id);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].ai_feedback?.includes("Looks correct"), true);
+  });
 });

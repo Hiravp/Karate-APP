@@ -213,3 +213,24 @@ export function classEnrollments(store: DemoStore, classId: string) {
 export function classAssignments(store: DemoStore, classId: string): Assignment[] {
   return store.assignments.filter((a) => a.class_id === classId);
 }
+
+export function teacherSubmissions(store: DemoStore, teacherId: string) {
+  const classIds = new Set(
+    store.classes.filter((c) => c.teacher_id === teacherId).map((c) => c.id)
+  );
+  return store.submissions
+    .map((sub) => {
+      const assignment = store.assignments.find((a) => a.id === sub.assignment_id);
+      if (!assignment || !classIds.has(assignment.class_id)) return null;
+      const cls = store.classes.find((c) => c.id === assignment.class_id);
+      const student = store.users.find((u) => u.id === sub.student_id);
+      return { ...sub, assignment, className: cls?.name ?? "Class", student };
+    })
+    .filter(Boolean) as Array<
+    Submission & {
+      assignment: Assignment;
+      className: string;
+      student: AppUser | undefined;
+    }
+  >;
+}

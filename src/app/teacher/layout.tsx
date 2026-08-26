@@ -8,6 +8,7 @@ import { AppHeader } from "@/components/layout/app-header";
 const LINKS = [
   { href: "/teacher", label: "Dashboard" },
   { href: "/teacher/assignments", label: "Assignments" },
+  { href: "/teacher/submissions", label: "Submissions" },
 ];
 
 export default function TeacherLayout({
