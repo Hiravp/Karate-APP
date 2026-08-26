@@ -2,6 +2,8 @@
 
 Educational web app for teachers and students covering Algebra through Calculus, AP Math, and IB Math.
 
+**GitHub:** [Hiravp/Mathtutoring](https://github.com/Hiravp/Mathtutoring)
+
 **Local-first:** auth, classes, enrollments, and assignments run in the browser (`localStorage`). Cerebras AI runs through Next.js server actions. Supabase and Vercel can be connected later — schema and deploy notes are already in the repo.
 
 ## Tech stack
