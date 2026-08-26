@@ -1,40 +1,65 @@
-# Karate-APP
+# All-in-One Math Help
 
-Goju Karate Kata Motion Coach is a browser app prototype that uses a camera as a
-motion sensor, estimates movement from video frames in the browser, and gives
-kata-specific correction cues with a 3D body model.
+Full-stack educational web app for teachers and students covering Algebra through Calculus, AP Math, and IB Math. AI features use the Cerebras API via Next.js Server Actions.
+
+## Tech stack
+
+- **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS
+- **UI:** shadcn-style components + Lucide React
+- **Backend / DB:** Supabase schema (PostgreSQL + Auth) with a local demo store when keys are unset
+- **AI:** `@cerebras/cerebras_cloud_sdk` (server-only)
+
+## Quick start
+
+```bash
+cp .env.example .env.local
+# Set CEREBRAS_API_KEY in .env.local
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Environment
+
+| Variable | Purpose |
+| --- | --- |
+| `CEREBRAS_API_KEY` | Server-side Cerebras key (required for AI Generate / Scanner / Games) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Optional Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional service role key |
+
+Without Supabase credentials, auth and class data persist in the browser (`localStorage`) so you can demo the full flow.
+
+## Supabase schema
+
+Run `supabase/schema.sql` in the Supabase SQL editor to create:
+
+- `users`, `classes`, `enrollments`, `assignments`, `submissions`
+- signup trigger from `auth.users`
+- row-level security policies for teachers and students
 
 ## Features
 
-- Goju kata selector with reference notes for Sanchin, Gekisai Dai Ichi, Saifa,
-  and Seiyunchin.
-- Camera-based motion sensing using `getUserMedia` and canvas frame analysis.
-- Kata-specific scoring for motion, stance stability, guard height, and AI
-  confidence.
-- 3D correction model that changes stance width, guard height, hip rotation, and
-  shoulder rotation based on the selected kata and detected motion.
-- Private by design: video is processed locally in the browser and is not sent
-  to a server.
+### Teacher portal (`/teacher`)
 
-## Run locally
+- Dashboard with managed classes and enrollments
+- Auto-generated 6-character `class_code` on class creation
+- Assignment builder with **AI Generate** (AP / IB / Standard worksheets)
 
-```bash
-npm start
-```
+### Student portal (`/student`)
 
-Open `http://localhost:4173` in a browser. Camera access requires localhost or
-HTTPS. If camera access is blocked, the app keeps running with demo motion data.
+- Join class by code
+- Subject modules: Algebra, Geometry, Algebra 2, Precalculus, Calculus, AP, IB
+- Math games (AI quizzes)
+- AI Homework Scanner with mock OCR image upload + Cerebras tutor feedback
 
-## Test
+## Scripts
 
 ```bash
-npm test
+npm run dev      # development server
+npm run build    # production build
+npm run start    # serve production build
+npm run lint     # eslint
+npm test         # unit tests
 ```
-
-## Notes for future AI pose integration
-
-The current implementation uses lightweight frame-difference motion analysis so
-the prototype works without external services or model downloads. The
-`src/analysisEngine.js` module is intentionally isolated so a production pose
-model, such as MediaPipe Pose, MoveNet, or a custom Goju kata classifier, can
-replace the sample generation while keeping the kata correction UI unchanged.
