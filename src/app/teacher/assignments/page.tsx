@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
+import { FormEvent, useMemo, useState, useTransition } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { generateWorksheetAction } from "@/actions/cerebras";
 import { useAuth } from "@/lib/auth-context";
@@ -18,7 +18,7 @@ export default function TeacherAssignmentsPage() {
     [store, user]
   );
 
-  const [classId, setClassId] = useState("");
+  const [classId, setClassId] = useState<string | null>(null);
   const [topic, setTopic] = useState("");
   const [format, setFormat] = useState<"AP" | "IB" | "Standard">("AP");
   const [subject, setSubject] = useState("Calculus");
@@ -27,15 +27,10 @@ export default function TeacherAssignmentsPage() {
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (!classId && classes[0]?.id) {
-      setClassId(classes[0].id);
-      return;
-    }
-    if (classId && !classes.some((c) => c.id === classId)) {
-      setClassId(classes[0]?.id ?? "");
-    }
-  }, [classes, classId]);
+  const selectedClassId =
+    classId && classes.some((c) => c.id === classId)
+      ? classId
+      : (classes[0]?.id ?? "");
 
   function onGenerate(e: FormEvent) {
     e.preventDefault();
@@ -60,12 +55,12 @@ export default function TeacherAssignmentsPage() {
   }
 
   function onSave() {
-    if (!classId || !topic || questions.length === 0) {
+    if (!selectedClassId || !topic || questions.length === 0) {
       setError("Generate a worksheet and choose a class before saving.");
       return;
     }
     const assignment = createAssignment({
-      class_id: classId,
+      class_id: selectedClassId,
       topic,
       content: questions,
       format,
@@ -111,7 +106,7 @@ export default function TeacherAssignmentsPage() {
               <select
                 id="class"
                 className="flex h-11 w-full rounded-md border border-ink/15 bg-paper px-3 text-sm"
-                value={classId}
+                value={selectedClassId}
                 onChange={(e) => setClassId(e.target.value)}
               >
                 <option value="">Select a class</option>
