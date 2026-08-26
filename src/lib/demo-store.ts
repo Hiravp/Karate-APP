@@ -111,10 +111,17 @@ export function joinClass(
   studentId: string,
   code: string
 ): { store: DemoStore; classRecord?: ClassRecord; error?: string } {
-  const class_code = code.trim().toUpperCase();
+  const class_code = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (class_code.length !== 6) {
+    return { store, error: "Enter the full 6-character class code." };
+  }
   const classRecord = store.classes.find((c) => c.class_code === class_code);
   if (!classRecord) {
-    return { store, error: "Class code not found. Check with your teacher." };
+    return {
+      store,
+      error:
+        "Class code not found. Use the same browser as the teacher account, or ask your teacher to recreate the class.",
+    };
   }
   const already = store.enrollments.some(
     (e) => e.class_id === classRecord.id && e.student_id === studentId

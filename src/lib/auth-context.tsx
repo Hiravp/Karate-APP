@@ -4,9 +4,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import type {
@@ -24,6 +23,7 @@ interface AuthContextValue {
   user: AppUser | null;
   store: DemoStore;
   refresh: () => void;
+  resetDemoData: () => void;
   signUp: (input: { full_name: string; email: string; role: UserRole }) => string | null;
   signIn: (email: string) => string | null;
   signOut: () => void;
@@ -44,18 +44,61 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState<DemoStore>(db.loadStore());
-  const [ready, setReady] = useState(false);
+const empty: DemoStore = {
+  users: [],
+  classes: [],
+  enrollments: [],
+  assignments: [],
+  submissions: [],
+  sessionUserId: null,
+};
 
-  useEffect(() => {
-    setStore(db.loadStore());
-    setReady(true);
-  }, []);
+let memoryStore: DemoStore = empty;
+const listeners = new Set<() => void>();
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot(): DemoStore {
+  return memoryStore;
+}
+
+function getServerSnapshot(): DemoStore {
+  return empty;
+}
+
+function writeStore(next: DemoStore) {
+  memoryStore = next;
+  db.saveStore(next);
+  emit();
+}
+
+function ensureBootstrapped() {
+  if (typeof window === "undefined") return;
+  if ((ensureBootstrapped as { done?: boolean }).done) return;
+  memoryStore = db.loadStore();
+  (ensureBootstrapped as { done?: boolean }).done = true;
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  ensureBootstrapped();
+  const store = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const ready = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const persist = useCallback((next: DemoStore) => {
-    db.saveStore(next);
-    setStore(next);
+    writeStore(next);
   }, []);
 
   const user = useMemo(() => db.getSessionUser(store), [store]);
@@ -65,7 +108,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ready,
       user,
       store,
-      refresh: () => setStore(db.loadStore()),
+      refresh: () => {
+        memoryStore = db.loadStore();
+        emit();
+      },
+      resetDemoData: () => writeStore({ ...empty }),
       signUp: (input) => {
         const result = db.signUp(store, input);
         if (result.error) return result.error;
