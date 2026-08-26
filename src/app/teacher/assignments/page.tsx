@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState, useTransition } from "react";
+import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { generateWorksheetAction } from "@/actions/cerebras";
 import { useAuth } from "@/lib/auth-context";
@@ -18,7 +18,7 @@ export default function TeacherAssignmentsPage() {
     [store, user]
   );
 
-  const [classId, setClassId] = useState(classes[0]?.id ?? "");
+  const [classId, setClassId] = useState("");
   const [topic, setTopic] = useState("");
   const [format, setFormat] = useState<"AP" | "IB" | "Standard">("AP");
   const [subject, setSubject] = useState("Calculus");
@@ -26,6 +26,16 @@ export default function TeacherAssignmentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!classId && classes[0]?.id) {
+      setClassId(classes[0].id);
+      return;
+    }
+    if (classId && !classes.some((c) => c.id === classId)) {
+      setClassId(classes[0]?.id ?? "");
+    }
+  }, [classes, classId]);
 
   function onGenerate(e: FormEvent) {
     e.preventDefault();
@@ -64,6 +74,9 @@ export default function TeacherAssignmentsPage() {
       setSavedMsg(`Saved “${assignment.topic}” to the class.`);
       setQuestions([]);
       setTopic("");
+      setError(null);
+    } else {
+      setError("Could not save assignment. Make sure you are signed in as a teacher.");
     }
   }
 
